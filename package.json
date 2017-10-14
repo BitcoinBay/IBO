@@ -1,0 +1,25 @@
+{
+  "name": "ibo",
+  "version": "1.0.0",
+  "description": "",
+  "main": "truffle.js",
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/BitcoinBay/IBO.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/BitcoinBay/IBO/issues"
+  },
+  "homepage": "https://github.com/BitcoinBay/IBO#readme",
+  "dependencies": {
+    "truffle-hdwallet-provider": "0.0.3"
+  }
+}
