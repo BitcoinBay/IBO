@@ -1,8 +1,8 @@
 import "./HumanStandardToken.sol";
 import "./Ownable.sol";
-import "./SafeMath.sol";
 
 pragma solidity 0.4.17;
+
 
 contract IBO is Ownable{
           using SafeMath for uint256;
@@ -17,10 +17,12 @@ contract IBO is Ownable{
 
     uint numBounties;
     uint numClaims;
-
+    //Antoine is the best
     uint markedTokenBalance;
+    mapping(uint=>address) users;
+    
 
-
+    
 
     function withdrawEth(){
         owner.transfer(this.balance);
@@ -51,7 +53,6 @@ contract IBO is Ownable{
         uint ClaimID;
         address Claimer;
         bytes32 SubmissionHash;
-
     }
 
 
@@ -90,32 +91,41 @@ contract IBO is Ownable{
         Bounties[numBounties] = Bounty(numBounties,_name,_reward,1,false,0,BountyType.Infinite,_claimFraction); 
 
     }
-      /*function CreateBountyMilestone(string _name,uint _reward){
+     
+     function CreateBountyMilestone(string _name,uint _reward,uint _sections){
             require(_reward >= 1);
             require((token.balanceOf(this) - markedTokenBalance)>= _reward);
-            markedTokenBalance += _reward;
+            
+            markedTokenBalance += _reward; 
+            
             numBounties++;
             
-        Bounties[numBounties] = Bounty(numBounties,_name,_reward,1,false,0,BountyType.Infinite,_claimFraction); 
-
-    }*/
-
+        Bounties[numBounties] = Bounty(numBounties,_name,_reward,3,true,0,BountyType.Milestone,4); 
+    }
     function CreateClaim(uint _BountyID, bytes32 _SubmissionHash){
+        uint payout;
       Bounty storage bounty =  Bounties[_BountyID];
       bounty.numClaims++;
+      require(bounty.Available>=1);
   if (bounty.bountyType == BountyType.Normal){
       bounty.claims[bounty.numClaims] = Claim(_BountyID,bounty.numClaims,msg.sender,_SubmissionHash);
+      bounty.Available--;
       }else if(bounty.bountyType == BountyType.Infinite){
           //calculate payout
-              uint payout = (bounty.Reward).mul(bounty.claimFraction).div(1000000);
+               payout = (bounty.Reward).mul(bounty.claimFraction).div(1000000);
                           //transfer _tokenAddress
 
             require(token.transfer(msg.sender, payout));
                           //subtract from reward
 
             bounty.Reward -= payout;
-
-              
+      }
+      else if(bounty.bountyType==BountyType.Milestone){
+          require(bounty.Reward>0);
+            payout = (bounty.Reward).div(bounty.claimFraction);
+            require(token.transfer(msg.sender,payout));
+            bounty.Reward -= payout;
+            bounty.claimFraction--;
       }
     
 }
