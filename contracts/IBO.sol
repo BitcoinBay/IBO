@@ -1,7 +1,7 @@
 import "./HumanStandardToken.sol";
 import "./Ownable.sol";
 
-pragma solidity ^0.4.14;
+pragma solidity 0.4.15;
 
 contract IBO is Ownable{
 
@@ -18,9 +18,6 @@ contract IBO is Ownable{
     uint markedTokenBalance;
 
 
-    function() {
-
-    }
 
     function withdrawEth(){
         owner.transfer(this.balance);
@@ -38,12 +35,11 @@ contract IBO is Ownable{
         uint Reward;      //Reward for this bounty
         uint Available;   //bounties available
         bool CanBenefact;
+        uint numClaims;
+        mapping(uint=>Claim) claims;
        // BountyType bountyType;
        // uint claimFraction;
     }
-
-   // enum BountyType{Normal,Infinite}
-    enum ClaimState{Approved,Rejected,Pending}
 
     struct Claim {
         uint BountyID;
@@ -52,8 +48,13 @@ contract IBO is Ownable{
         bytes32 SubmissionHash;
 
     }
+
+   // enum BountyType{Normal,Infinite}
+    enum ClaimState{Approved,Rejected,Pending}
+
+
     mapping(uint=>Bounty) Bounties;
-    mapping(uint => Claim) Claims;
+    mapping(uint => uint[]) claimsForBounty;
 
 
     function CreateBounty(string _name,uint _reward,uint _available,bool _CanBenefact){
@@ -69,22 +70,23 @@ contract IBO is Ownable{
 
         numBounties++;
 
-        Bounties[numBounties] = Bounty(numBounties,_name,_reward,_available,_CanBenefact);
+        Bounties[numBounties] = Bounty(numBounties, _name, _reward, _available, _CanBenefact, 0);
 
     }
 
-    function CreateClaim(uint _BountyID,address _Claimer,bytes32 _SubmissionHash){
-        numClaims++;
+    function CreateClaim(uint _BountyID, address _Claimer, bytes32 _SubmissionHash){
+      Bounty storage bounty =  Bounties[_BountyID];
+      bounty.numClaims++;
 
-        Claims[numClaims] = Claim(_BountyID,numClaims,_Claimer,_SubmissionHash);
+      bounty.claims[bounty.numClaims] = Claim(_BountyID,bounty.numClaims,_Claimer,_SubmissionHash);
     }
 
   function Benefact(uint _BountyID) payable{
 
-      Bounty _Bounty = Bounties[_BountyID];
+      Bounty storage _Bounty = Bounties[_BountyID];
 
       uint BountyPrice = _Bounty.Reward*TokenValue;      //Price of 1 Bounty in Wei
-      uint numBounties = msg.value/BountyPrice;        //Number of Bounties benefacted
+       numBounties = msg.value/BountyPrice;        //Number of Bounties benefacted
       uint Remainder;                                   //Remaining Wei
       uint TotalReward;                                 // Total Token Reward
 
@@ -105,20 +107,22 @@ contract IBO is Ownable{
 
   }
 
-  function approveClaim(uint claimID) {
-      Claim claim = Claims[claimID];
+  function approveClaim(uint bountyId, uint claimID) {
+      Bounty storage b = Bounties[bountyId];
+      Claim storage claim = b.claims[claimID];
       uint bountyID = claim.BountyID;
-      Bounty bounty = Bounties[bountyID];
+      Bounty storage bounty = Bounties[bountyID];
       require(token.transfer(claim.Claimer, bounty.Reward));
       bounty.Available--;
   }
    function GetBounty(uint _BountyID) constant returns(string, uint, uint){
-       Bounty _bounty = Bounties[_BountyID];
+       Bounty storage _bounty = Bounties[_BountyID];
        return (_bounty.Name,_bounty.Reward,_bounty.Available);
    }
 
-   function GetClaim(uint _ClaimID) constant returns(uint, uint, address, bytes32){
-       Claim storage  _claim = Claims[_ClaimID];
+   function GetClaim(uint bountyID, uint _ClaimID) constant returns(uint, uint, address, bytes32){
+       Bounty storage bounty = Bounties[bountyID];
+       Claim storage _claim= bounty.claims[_ClaimID];
        return (_claim.BountyID,_claim.ClaimID,_claim.Claimer,_claim.SubmissionHash);
    }
 
