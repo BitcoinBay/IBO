@@ -1,6 +1,7 @@
 import "./HumanStandardToken.sol";
 import "./Ownable.sol";
 
+
 pragma solidity 0.4.17;
 
 
@@ -100,7 +101,7 @@ contract IBO is Ownable{
             
             numBounties++;
             
-        Bounties[numBounties] = Bounty(numBounties,_name,_reward,3,true,0,BountyType.Milestone,4); 
+        Bounties[numBounties] = Bounty(numBounties,_name,_reward,1,true,0,BountyType.Milestone,_sections); 
     }
     function CreateClaim(uint _BountyID, bytes32 _SubmissionHash){
         uint payout;
