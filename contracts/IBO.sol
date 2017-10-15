@@ -1,5 +1,6 @@
 import "./HumanStandardToken.sol";
 import "./Ownable.sol";
+import "./SafeMath.sol";
 
 pragma solidity 0.4.17;
 
