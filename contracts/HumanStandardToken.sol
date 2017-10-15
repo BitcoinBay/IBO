@@ -1,6 +1,8 @@
 pragma solidity ^0.4.15;
 
 import "./StandardToken.sol";
+import './SafeMath.sol';
+
 contract HumanStandardToken is StandardToken {
 
     /* Public variables of the token */
